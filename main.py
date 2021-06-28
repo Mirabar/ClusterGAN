@@ -26,8 +26,6 @@ def user_input():
                         type=str, required=False, default='.')
     parser.add_argument('-r', '--restore_chkpt', help='continue with trained model',
                         type=int, required=False, default=0, choices=[0, 1])
-    parser.add_argument('-gg', '--gen_gif', help='gen gif',
-                        type=int, required=False, default=0, choices=[0, 1])
     parser.add_argument('-m', '--mode', help='whether to perform train or test',
                         type=str, required=False, default='train')
 
@@ -39,7 +37,7 @@ def user_input():
 
 class clusterGAN():
 
-    def __init__(self, real_data, n_classes, epochs, batch_size, checkpoint_prefix, save_dir, seed=None):
+    def __init__(self, real_data, n_classes, epochs, batch_size, checkpoint_prefix, save_dir):
 
         self.d_iter = 5
         self.save_dir = save_dir
@@ -64,9 +62,8 @@ class clusterGAN():
                                               discriminator=self.discriminator,
                                               encoder=self.encoder)
         self.manager = tf.train.CheckpointManager(self.checkpoint, self.checkpoint_prefix, max_to_keep=2)
-
         self.scale = 10
-        self.seed = seed
+
 
     # @tf.function
     def train_step(self, real_img):
@@ -189,13 +186,6 @@ def main(args):
         if not os.path.exists(args['dest_dir']):
             os.mkdir(args['dest_dir'])
 
-        if args['gen_gif']:
-            seed = utils.z_sampler(batch_size=16)
-            if not os.path.exists(args['dest_dir'] + '/gif_ims'):
-                os.mkdir(args['dest_dir'] + '/gif_ims')
-        else:
-            seed = None
-
         checkpoint_dir = args['dest_dir'] + '/' + args['training_checkpoins']
         checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
 
@@ -203,7 +193,7 @@ def main(args):
                                  n_classes=len(np.unique(train_labels)),
                                  epochs=args['epochs'],
                                  batch_size=BATCH_SIZE,
-                                 checkpoint_prefix=checkpoint_prefix, save_dir=args['dest_dir'], seed=seed)
+                                 checkpoint_prefix=checkpoint_prefix, save_dir=args['dest_dir'])
 
         history = cluster_gan.train(restore=args['restore_chkpt'])
         pickle.dump(history, open(args['dest_dir'] + '/history.pkl', 'wb'))
