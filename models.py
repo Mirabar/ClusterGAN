@@ -63,7 +63,6 @@ def generator(in_sh1=(30,), in_sh2=(10,)):
 
 def discriminator(in_sh=(28, 28, 1)):
     input_layer = Input(shape=in_sh)
-    #noise_layer = GaussianNoise(0.1)(input_layer)
     conv1 = conv_block(64, (4, 4), (2, 2), input_layer)
     conv2 = conv_block(128, (4, 4), (2, 2), conv1)
     flat = Flatten()(conv2)
